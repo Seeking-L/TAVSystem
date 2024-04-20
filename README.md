@@ -7,6 +7,6 @@
 #### 运行前修改：
 > Server中：由于private key的保密需要，未将Keys类上传。运行前需要添加Keys类，并数据库的用户名以及密码。 Keys类如下：
 <br>
-![Keys 1](https://github.com/Seeking-L/TAVSysytem/blob/main/READMEImgs/1.png)
+![image](http://github.com/Seeking-L/TAVSysytem/blob/main/READMEImgs/1.png)
 <br>
-![Keys2](https://github.com/Seeking-L/TAVSysytem/blob/main/READMEImgs/2.png)
+![image](http://github.com/Seeking-L/TAVSysytem/blob/main/READMEImgs/2.png)
