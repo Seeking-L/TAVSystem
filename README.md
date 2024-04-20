@@ -5,7 +5,7 @@
 > https://github.com/Seeking-L/TAVNode
 
 #### 运行前修改：
-> Server中：由于private key的保密需要，未将Keys类上传。运行前需要添加Keys类，并数据库的用户名以及密码。 Keys类如下：
+Server中：由于private key的保密需要，未将Keys类上传。运行前需要添加Keys类，并数据库的用户名以及密码。 Keys类如下：
 <br>
 ![image](READMEImgs/1.png)
 <br>
