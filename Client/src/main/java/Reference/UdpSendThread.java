@@ -1,8 +1,8 @@
+package Reference;
+
 import com.github.sarxos.webcam.Webcam;
-import com.github.sarxos.webcam.WebcamResolution;
 
 import javax.imageio.ImageIO;
-import javax.sound.sampled.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
