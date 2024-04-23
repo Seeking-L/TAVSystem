@@ -7,6 +7,7 @@ import java.util.LinkedList;
  * flag=2：server→client，回复登录。boolean isSuccess，（若登录成功）int userId，LinkedList<User> friends
  */
 public class LoginResult extends TcpMessage{
+    private static final long serialVersionUID=1L;
     private int flag;
     private boolean isSuccess;
     private int userId;

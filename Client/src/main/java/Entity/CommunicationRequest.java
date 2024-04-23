@@ -3,7 +3,8 @@ package Entity;
 /**
  * flag=3：client→server，选择好友进行联系。int 好友ID
  */
-public class ConnectionRequest extends TcpMessage{
+public class CommunicationRequest extends TcpMessage{
+    private static final long serialVersionUID=1L;
     private static int flag=3;
     private int friendId;
 
@@ -21,10 +22,17 @@ public class ConnectionRequest extends TcpMessage{
         this.friendId = friendId;
     }
 
-    public ConnectionRequest() {
+    public CommunicationRequest() {
     }
 
-    public ConnectionRequest(int friendId) {
+    public CommunicationRequest(int friendId) {
         this.friendId = friendId;
+    }
+
+    @Override
+    public String toString() {
+        return "CommunicationRequest{" +
+                "friendId=" + friendId +
+                '}';
     }
 }

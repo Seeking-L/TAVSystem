@@ -17,20 +17,26 @@ public class LoginMapper {
      * @param password user's password
      * @return userId (return 0 if failed)
      */
-    public static int login(String userName,String password){
+    public static User login(String userName,String password){
         try{
             Statement statement= SqlConnection.conn.createStatement();
             ResultSet resultSet=statement.executeQuery(
-                    "select user_id from user where user_name='"
+                    "select user_id,user_name,INET_NTOA(user_ip),port" +
+                            " from user where user_name='"
                             + userName
                             +"'and password='"+password+"'");
             if(resultSet.next()){
-                return resultSet.getInt("user_Id");
+                return new User(
+                        resultSet.getString("user_name"),
+                        resultSet.getString("INET_NTOA(user_ip)"),
+                        resultSet.getInt("port"),
+                        resultSet.getInt("user_id")
+                );
             }
-            return 0;
+            return null;
         } catch (SQLException e) {
             e.printStackTrace();
-            return 0;
+            return null;
         }
     }
 
@@ -58,6 +64,11 @@ public class LoginMapper {
         }
     }
 
+    /**
+     * get all the user's friends when it login
+     * @param userId
+     * @return this user's friends
+     */
     public static LinkedList<User> getFriends(int userId) {
         try {
             LinkedList<User> friends=new LinkedList<>();

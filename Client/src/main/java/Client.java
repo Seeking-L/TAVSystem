@@ -1,4 +1,6 @@
 import Comman.ServerInfo;
+import Threads.TcpInputScan;
+import Threads.WaitSelectFriend;
 import Utils.PortUtils;
 import Entity.*;
 
@@ -8,7 +10,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 public class Client {
-    private static volatile boolean isCommunicating;
+    private static boolean isCommunicating=false;
     private static ObjectInputStream tcpIn;
     private static ObjectOutputStream tcpOut;
     public static String userName;
@@ -16,15 +18,16 @@ public class Client {
     public static int clientPort;
     public static Socket tcpSocket;
     public static int ID;//this user's ID
+    private static int communicationDesId;//联络对象的ID
+    private static String communicationDesName;//联络对象Name
     public static LinkedList<User> friends;//friend list
+    private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        isCommunicating=false;
         clientPort = PortUtils.selectServerPort();
 
         //可进行改进；https://blog.csdn.net/mg2flyingff/article/details/47810265
         //login
-        Scanner scanner = new Scanner(System.in);
         System.out.println("请输入用户名：");
         userName = scanner.next();
         System.out.println("请输入密码：");
@@ -83,51 +86,83 @@ public class Client {
                 e.printStackTrace();
             }
         }
-        Thread waitSelectFriend=new Thread(()->{
-            OUT1:
-            while (!Thread.interrupted()){
-                try {
-                    if(scanner.hasNext()){
-                        if(scanner.hasNextInt()){
-                            int friendId=scanner.nextInt();
-                            for (User f:friends
-                            ) {
-                                if(f.getUserId()==friendId){//尝试联络好友
-                                    tcpOut.writeObject(new ConnectionRequest(friendId));
-                                    tcpOut.flush();
-                                    break OUT1;//等待服务器回信的工作交给waitCommunication线程去做（该线程同时监控服务器回信以及朋友发起的联络）
-                                }
-                            }
-                            System.out.println("无此ID的好友~");
-                        }
-                        else {
-                            scanner.next();
-                            System.out.println("若希望联系好友，请输入好友的ID~");
-                        }
-                    }
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-        });
+        
+        //开启一个WaitSelectFriend线程，它在用户选择好友时，会不断扫描用户的输入
+        Thread waitSelectFriend=new Thread(new WaitSelectFriend(scanner,tcpIn,tcpOut,friends));
         waitSelectFriend.start();
-        Thread waitCommunication=new Thread(()->{
+        
+        Thread listenTcpMessage=new Thread(()->{
             while(true){
                 try {
                     TcpMessage tcpMessage=null;
                     if (((tcpMessage = (TcpMessage) tcpIn.readObject()) != null)){
+                        if(tcpMessage.getFlag()==4){//server回复client：该用户试图联系的好友是否available
+                            CommunicationRequestReflect communicationRequestReflect=(CommunicationRequestReflect)tcpMessage;
+                            if(!communicationRequestReflect.isFriendAvailable()){//好友 is not available，回到选择好友与等待被联络状态
+                                System.out.println("这个好友不在线或正在与他人联络，请稍后再拨~");
 
+                                //waitSelectFriend线程在选择一次好友之后会自动结束。故需要重新开启一个waitSelectFriend1
+                                Thread waitSelectFriend1=new Thread(new WaitSelectFriend(scanner,tcpIn,tcpOut,friends));
+                                waitSelectFriend1.start();
+                            }else {//好友 is available,准备开启联络
+                                if(isCommunicating) continue;//说明已经已经处在了通信状态
+
+                                System.out.println("联络可用，正在准备开启联络~~");
+                                isCommunicating=true;
+
+                                //设置联系对象的ID和Name
+                                communicationDesId=communicationRequestReflect.getFriendId();
+                                for (User f:friends
+                                     ) {
+                                    if(f.getUserId()==communicationDesId) communicationDesName=f.getUserName();
+                                }
+
+                                scanner=null;
+                                waitSelectFriend.interrupt();
+                                Thread communicationInput=new Thread(new TcpInputScan(
+                                        tcpOut,communicationDesId,communicationDesName));
+                                communicationInput.start();
+                            }
+                        } else if (tcpMessage.getFlag()==5) {//有好友主动联系
+                            if(isCommunicating) continue;//说明已经已经处于通信状态
+                            isCommunicating=true;
+
+                            scanner=null;
+                            waitSelectFriend.interrupt();
+
+                            //CommunicationStartNotify
+                            CommunicationStartNotify communicationStartNotify=(CommunicationStartNotify)tcpMessage;
+
+                            //设置联系对象的ID和Name
+                            communicationDesId=communicationStartNotify.getFriendId();
+                            for (User f:friends
+                            ) {
+                                if(f.getUserId()==communicationDesId) communicationDesName=f.getUserName();
+                            }
+
+                            System.out.println("您的好友 "+communicationDesName+" 发起了联络~~");
+                            System.out.println("----------------------与 "+communicationDesName+" 的聊天室--------------------");
+
+                            Thread communicationInput=new Thread(new TcpInputScan(
+                                    tcpOut,communicationDesId,communicationDesName));
+                            communicationInput.start();
+
+                        } else if (tcpMessage.getFlag()==7) {
+                            //TextMessage
+                            TextMessageFromServer textMessageFromServer=(TextMessageFromServer) tcpMessage;
+                            System.out.println("##### "+communicationDesName+":   "+textMessageFromServer.getMessage());
+                            System.out.println();
+                        }
                     }
                 } catch (IOException e) {
+                    e.printStackTrace();
                     throw new RuntimeException(e);
                 } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
                     throw new RuntimeException(e);
                 }
             }
         });
-        waitCommunication.start();
-        waitSelectFriend.interrupt();
-
-
+        listenTcpMessage.start();
     }
 }

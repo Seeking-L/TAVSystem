@@ -8,6 +8,6 @@ public class test1 {
     public void test1(){
         TcpLogin tcpLogin=new TcpLogin("1","2");
         TcpMessage tcpMessage=tcpLogin;
-        System.out.println(tcpMessage.getName());
+//        System.out.println(tcpMessage.getName());
     }
 }

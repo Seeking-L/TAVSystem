@@ -1,5 +1,7 @@
 package Utils;
 
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 /**
@@ -8,7 +10,14 @@ import java.net.Socket;
  */
 public class SocketWorker {
     private Socket socket;
-    private boolean isCommunicating;
+    private ObjectOutputStream tcpOut;
+    private ObjectInputStream tcpIn;
+
+    public SocketWorker(Socket socket, ObjectOutputStream tcpOut, ObjectInputStream tcpIn) {
+        this.socket = socket;
+        this.tcpOut = tcpOut;
+        this.tcpIn = tcpIn;
+    }
 
     public Socket getSocket() {
         return socket;
@@ -18,16 +27,19 @@ public class SocketWorker {
         this.socket = socket;
     }
 
-    public boolean isCommunicating() {
-        return isCommunicating;
+    public ObjectOutputStream getTcpOut() {
+        return tcpOut;
     }
 
-    public void setCommunicating(boolean communicating) {
-        isCommunicating = communicating;
+    public void setTcpOut(ObjectOutputStream tcpOut) {
+        this.tcpOut = tcpOut;
     }
 
-    public SocketWorker(Socket socket, boolean isCommunicating) {
-        this.socket = socket;
-        this.isCommunicating = isCommunicating;
+    public ObjectInputStream getTcpIn() {
+        return tcpIn;
+    }
+
+    public void setTcpIn(ObjectInputStream tcpIn) {
+        this.tcpIn = tcpIn;
     }
 }

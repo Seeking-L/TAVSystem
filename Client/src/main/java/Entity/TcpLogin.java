@@ -1,8 +1,5 @@
 package Entity;
 
-import javax.swing.*;
-import java.io.Serializable;
-
 /**
  * flag=1：client→server，进行登录。String username，String password
  */
