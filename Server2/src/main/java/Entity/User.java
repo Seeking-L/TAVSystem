@@ -44,11 +44,6 @@ public class User implements Serializable {
     public User() {
     }
 
-    public User(String userName, int userId) {
-        this.userName = userName;
-        this.userId = userId;
-    }
-
     public User(String userName, String IP, int port, int userId) {
         this.userName = userName;
         this.IP = IP;

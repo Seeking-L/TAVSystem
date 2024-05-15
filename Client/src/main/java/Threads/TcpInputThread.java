@@ -13,14 +13,14 @@ import java.util.Scanner;
 /**
  * 此线程用于：用户登录成功后，与朋友联系上之前。即用来不断扫描用户选择好友的输入
  */
-public class WaitSelectFriend implements Runnable{
+public class TcpInputThread implements Runnable{
     private LinkedList<User> communicatingFriend;
     private Scanner scanner;
     private ObjectInputStream tcpIn;
     private ObjectOutputStream tcpOut;
     public LinkedList<User> friends;//friend list
 
-    public WaitSelectFriend(LinkedList<User> communicatingFriend,Scanner scanner, ObjectInputStream tcpIn, ObjectOutputStream tcpOut, LinkedList<User> friends) {
+    public TcpInputThread(LinkedList<User> communicatingFriend, Scanner scanner, ObjectInputStream tcpIn, ObjectOutputStream tcpOut, LinkedList<User> friends) {
         this.communicatingFriend=communicatingFriend;
         this.scanner = scanner;
         this.tcpIn = tcpIn;

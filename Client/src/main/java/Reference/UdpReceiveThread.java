@@ -77,7 +77,7 @@ public class UdpReceiveThread implements Runnable {
             }
             byte[] data = datagramPacket.getData();
 
-            //从data中先读出realdata的长度，再独户realdata
+            //从data中先读出realdata的长度，再读出realdata
             ByteBuffer byteBuffer = ByteBuffer.wrap(data);
 
             //读出第一个int，分辨这是一个video数据包还是audio数据包。1代表video，2代表audio
