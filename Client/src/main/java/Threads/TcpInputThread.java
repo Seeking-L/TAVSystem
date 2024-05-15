@@ -53,7 +53,7 @@ public class TcpInputThread implements Runnable{
                             System.out.println("若希望联系好友，请输入好友的ID~");
                         }
                     }else {//已联系上好友
-                        System.out.println(communicatingFriend.get(0));
+//                        System.out.println(communicatingFriend.get(0));
                         String message=scanner.nextLine();
 
                         if(message.equals("/bye")){//结束程序

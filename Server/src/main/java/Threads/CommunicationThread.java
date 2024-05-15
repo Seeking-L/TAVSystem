@@ -1,13 +1,13 @@
 package Threads;
 
-import Entity.CommunicationStartNotify;
-import Entity.TcpMessage;
-import Entity.TextMessageFromClient;
-import Entity.TextMessageFromServer;
+import Entity.*;
+import Utils.PortUtils;
 import Utils.SocketWorker;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 public class CommunicationThread implements Runnable {
@@ -25,9 +25,16 @@ public class CommunicationThread implements Runnable {
     private ObjectOutputStream tcpOut2;
     private int Id2;
 
+    //UDP
+    private Thread udpThread;
+    private int localUdpPort;
+    private InetSocketAddress remoteReceiver1;//user1的接收端口
+    private InetSocketAddress remoteReceiver2;//user2的接收端口
+
+
     public CommunicationThread(HashMap<Integer, SocketWorker> sockets,
                                Socket socket1, ObjectInputStream tcpIn1, ObjectOutputStream tcpOut1, int id1,
-                               SocketWorker socket2, int id2) throws IOException {
+                               Socket socket2, ObjectInputStream tcpIn2, ObjectOutputStream tcpOut2, int id2) throws IOException {
         this.sockets = sockets;
 
         this.socket1 = socket1;
@@ -35,9 +42,9 @@ public class CommunicationThread implements Runnable {
         this.tcpOut1 = tcpOut1;
         Id1 = id1;
 
-        this.socket2 = socket2.getSocket();
-        this.tcpIn2 = socket2.getTcpIn();
-        this.tcpOut2 = socket2.getTcpOut();
+        this.socket2 = socket2;
+        this.tcpIn2 = tcpIn2;
+        this.tcpOut2 = tcpOut2;
         Id2 = id2;
 
         System.out.println("---聊天室  " + Id1 + "-" + Id2 + "  开启------");
@@ -45,16 +52,24 @@ public class CommunicationThread implements Runnable {
         CommunicationStartNotify communicationStartNotify = new CommunicationStartNotify(id1);
         this.tcpOut2.writeObject(communicationStartNotify);
         this.tcpOut2.flush();
+
+        udpThread=null;
+        remoteReceiver1=new InetSocketAddress(socket1.getInetAddress().getHostAddress(),socket1.getPort());
+        System.out.println("1: "+remoteReceiver1);
+        remoteReceiver2=new InetSocketAddress(socket2.getInetAddress().getHostAddress(),socket2.getPort());
+        System.out.println("2: "+remoteReceiver2);
     }
 
     @Override
     public void run() {
         Thread user1To2 = new Thread(() -> {
             try {
+//                System.out.println(tcpIn1.available());
                 while (true) {
                     TcpMessage tcpMessage = null;
                     if ((tcpMessage = (TcpMessage) tcpIn1.readObject()) != null) {//user1发来消息
-                        if (tcpMessage.getFlag() == 6) {
+
+                        if (tcpMessage.getFlag() == 6) {//文字消息
                             TextMessageFromClient textMessageFromClient1 = (TextMessageFromClient) tcpMessage;
                             TextMessageFromServer textMessageFromServer1 = new TextMessageFromServer(
                                     textMessageFromClient1.getDesId(),
@@ -62,6 +77,25 @@ public class CommunicationThread implements Runnable {
                             tcpOut2.writeObject(textMessageFromServer1);
                             tcpOut2.flush();
                             System.out.println("1to2:" + textMessageFromClient1);
+                        }
+                        else if (tcpMessage.getFlag()==8){//用户要求发起video
+                            if(udpThread!=null) continue;
+                            localUdpPort= PortUtils.selectServerPort();
+
+                            //告知两个用户即将开启UDP
+                            tcpOut1.writeObject(new VideoStartNotify(localUdpPort));
+                            tcpOut2.writeObject(new VideoStartNotify(localUdpPort));
+                            tcpOut1.flush();
+                            tcpOut2.flush();
+
+                            udpThread=new Thread(new UdpThread(
+                                    Id1,
+                                    Id2,
+                                    localUdpPort,
+                                    remoteReceiver1,
+                                    remoteReceiver2
+                                    ));
+                            udpThread.start();
                         }
                     }
                 }
@@ -71,29 +105,47 @@ public class CommunicationThread implements Runnable {
         });
         user1To2.start();
         Thread user2To1 = new Thread(() -> {
-            while (true) {
-                try {
+            try {
+                Thread.sleep(500);//等待SingelTcpThread结束
+//                System.out.println(tcpIn2.available());
+                while (true) {
                     TcpMessage tcpMessage = null;
-                    Object object=tcpIn2.readObject();
-                    if (object != null) {//user2发来消息
-                        tcpMessage=(TcpMessage) object;
-                        System.out.println(tcpMessage);
+                    if ((tcpMessage = (TcpMessage) tcpIn2.readObject()) != null) {//user2发来消息
                         if (tcpMessage.getFlag() == 6) {
                             TextMessageFromClient textMessageFromClient2 = (TextMessageFromClient) tcpMessage;
-                            System.out.println(textMessageFromClient2);
                             TextMessageFromServer textMessageFromServer2 = new TextMessageFromServer(
                                     textMessageFromClient2.getDesId(),
                                     textMessageFromClient2.getMessage());
                             tcpOut1.writeObject(textMessageFromServer2);
                             tcpOut1.flush();
                             System.out.println("2to1:" + textMessageFromClient2);
+                        }else if (tcpMessage.getFlag()==8){//用户要求发起video
+                            if(udpThread!=null) continue;
+                            localUdpPort= PortUtils.selectServerPort();
+                            Thread.sleep(1000);
+
+                            //告知两个用户即将开启UDP
+                            tcpOut1.writeObject(new VideoStartNotify(localUdpPort));
+                            tcpOut2.writeObject(new VideoStartNotify(localUdpPort));
+                            tcpOut1.flush();
+                            tcpOut2.flush();
+
+                            udpThread=new Thread(new UdpThread(
+                                    Id1,
+                                    Id2,
+                                    localUdpPort,
+                                    remoteReceiver1,
+                                    remoteReceiver2
+                            ));
+                            udpThread.start();
                         }
                     }
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
                 }
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-
         });
         user2To1.start();
     }

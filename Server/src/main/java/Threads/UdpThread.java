@@ -63,12 +63,12 @@ public class UdpThread implements Runnable {
             //从data中先读出realdata的长度，再读出realdata
             ByteBuffer byteBuffer = ByteBuffer.wrap(data);
 
-            //读出第一个int，分辨这是一个video数据包还是audio数据包。1代表video，2代表audio
+            //读出第一个int，分辨这是哪个用户发送的
             int Flag = byteBuffer.getInt();
 
             if (Flag == Id1) {// 1->2 的数据包
                 int realDataLength = byteBuffer.getInt();
-//                System.out.println("receive: realDataLength: " + realDataLength);//TODO---调试用
+                System.out.println("1->2: realDataLength: " + realDataLength);//TODO---调试用
                 try {
                     transmit(remoteReceiver2,Arrays.copyOfRange(data, 4, realDataLength + 12));
                 } catch (IOException e) {
@@ -76,7 +76,7 @@ public class UdpThread implements Runnable {
                 }
             } else if (Flag == Id2) {// 2->1 数据包
                 int realDataLength = byteBuffer.getInt();
-//                System.out.println("receive: realDataLength: " + realDataLength);//TODO---调试用
+                System.out.println("2->1: realDataLength: " + realDataLength);//TODO---调试用
                 try {
                     transmit(remoteReceiver1,Arrays.copyOfRange(data, 4, realDataLength + 12));
                 } catch (IOException e) {
@@ -92,7 +92,7 @@ public class UdpThread implements Runnable {
 
     public void transmit(InetSocketAddress remoteReceiver,byte[] data) throws IOException {
         sendDataPacket = new DatagramPacket(data, 0, data.length, remoteReceiver);
-        udpVideoSender.send(receivedDatagramPacket);
+        udpVideoSender.send(sendDataPacket);
     }
 
 }

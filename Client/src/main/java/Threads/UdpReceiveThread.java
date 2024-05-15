@@ -72,11 +72,13 @@ public class UdpReceiveThread implements Runnable {
             ByteBuffer byteBuffer = ByteBuffer.wrap(data);
 
             //读出第一个int，分辨这是一个video数据包还是audio数据包。1代表video，2代表audio
+            int realDataLength = byteBuffer.getInt();
+
+//            System.out.println("udp packet: len:"+realDataLength);
+
             int VAFlag = byteBuffer.getInt();
 
             if (VAFlag == 1) {//Video数据包
-                int realDataLength = byteBuffer.getInt();
-
 //                System.out.println("receive: realDataLength: " + realDataLength);//TODO---调试用
                 try {
                     trans(Arrays.copyOfRange(data, 8, realDataLength + 8));
@@ -86,8 +88,7 @@ public class UdpReceiveThread implements Runnable {
                     e.printStackTrace();
                 }
             } else if (VAFlag == 2) {//Audio数据包
-                int len = byteBuffer.getInt();
-                sourceDataLine.write(data, 8, len+8);//播放声音
+                sourceDataLine.write(data, 8, realDataLength+8);//播放声音
             }
         }
 

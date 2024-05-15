@@ -47,7 +47,7 @@ public class AudioSendThread implements Runnable{
 
                 if(len!=-1) {
                     //将data的长度（int）转换为一个byte数组，插到data的最前端
-                    ByteBuffer byteBuffer = ByteBuffer.allocate(2*Integer.BYTES);
+                    ByteBuffer byteBuffer = ByteBuffer.allocate(3*Integer.BYTES);
                     byteBuffer.putInt(0,ID);//用户ID
                     byteBuffer.putInt(4,len);
                     byteBuffer.putInt(8,2);//数字2代表这是一个audio数据包

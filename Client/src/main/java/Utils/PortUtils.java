@@ -41,7 +41,7 @@ public class PortUtils {
 
     //to find an available server port
     public static int selectServerPort(){
-        int i=8888;
+        int i=6666;
         while(!isPortAvailable(i)){
             i++;
         }

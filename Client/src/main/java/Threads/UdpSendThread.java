@@ -83,7 +83,7 @@ public class UdpSendThread implements Runnable {
         byte[] data = byteArrayOutputStream.toByteArray();
 
         //将data的长度（int）转换为一个byte数组，插到data的最前端
-        ByteBuffer byteBuffer = ByteBuffer.allocate(2*Integer.BYTES);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(3*Integer.BYTES);
         byteBuffer.putInt(0,ID);//此用户的ID
         byteBuffer.putInt(4,data.length);
         byteBuffer.putInt(8,1);//数字1代表这是一个Video数据包

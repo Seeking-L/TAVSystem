@@ -29,17 +29,17 @@ public class Client {
     private static Thread udpReceiveThread;
 
     public static void main(String[] args) {
-        clientPort = PortUtils.selectServerPort();
 
         //可进行改进；https://blog.csdn.net/mg2flyingff/article/details/47810265
         //login
-        System.out.println("请输入用户名：");
+        System.out.print("请输入用户名：");
         userName = scanner.next();
-        System.out.println("请输入密码：");
+        System.out.print("请输入密码：");
         password = scanner.next();
 
         try {
             tcpSocket = new Socket(ServerInfo.SERVERIP, ServerInfo.SERVERPORT);
+            clientPort=tcpSocket.getLocalPort();
         } catch (IOException e) {
             System.out.println("---------------连接服务器失败！--------------------");
             e.printStackTrace();
@@ -70,12 +70,16 @@ public class Client {
                     if (loginResult.isSuccess()) {//login succeeded
                         ID=loginResult.getUserId();
                         friends = loginResult.getFriends();
-                        System.out.println("您的好友：");
+                        System.out.println("Your Friends List");
+                        System.out.println("-------------------------------");
+                        System.out.printf("%-15s %-20s%n", "UserID", "UserName");
+                        System.out.println("-------------------------------");
                         for (User f : friends) {
-                            System.out.println(f);
+                            System.out.printf("%-15s %-20s%n", f.getUserId(), f.getUserName());
                         }
-                        System.out.println("请选择您要发起对话的好友，或等待好友联络~");
-                        System.out.println("若要发起对话，请输入对方的ID~");
+                        System.out.println("-------------------------------");
+                        System.out.println("请选择您要发起对话的好友，或等待好友联络");
+                        System.out.println("若要发起对话，请输入对方的ID");
                         break;
                     }
                     else {
@@ -105,12 +109,12 @@ public class Client {
                         if(tcpMessage.getFlag()==4){//server回复client：该用户试图联系的好友是否available
                             CommunicationRequestReflect communicationRequestReflect=(CommunicationRequestReflect)tcpMessage;
                             if(!communicationRequestReflect.isFriendAvailable()){//好友 is not available，回到选择好友与等待被联络状态
-                                System.out.println("这个好友不在线或正在与他人联络，请稍后再拨~");
+                                System.out.println("这个好友不在线或正在与他人联络，请稍后再拨");
 
                             }else {//好友 is available,准备开启联络
                                 if(isCommunicating) continue;//说明已经已经处在了通信状态
 
-                                System.out.println("联络可用，正在准备开启联络~~");
+                                System.out.println("联络可用，正在准备开启联络");
                                 isCommunicating=true;
 
                                 //设置联系对象的信息
@@ -153,8 +157,9 @@ public class Client {
                         } else if (tcpMessage.getFlag()==9) {//通知开启video
                             VideoStartNotify videoStartNotify=(VideoStartNotify) tcpMessage;
                             udpReceiveThread=new Thread(new UdpReceiveThread(clientPort));
+
                             udpSendThread=new Thread(new UdpSendThread(
-                                    (InetSocketAddress) tcpSocket.getRemoteSocketAddress(),
+                                    new InetSocketAddress(ServerInfo.SERVERIP,videoStartNotify.getServerUdpPort()),
                                     ID
                             ));
                             udpSendThread.start();
