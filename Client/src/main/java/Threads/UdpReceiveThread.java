@@ -1,4 +1,4 @@
-package Reference;
+package Threads;
 
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioFormat;
@@ -8,7 +8,10 @@ import javax.sound.sampled.SourceDataLine;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -16,18 +19,6 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class UdpReceiveThread implements Runnable {
-    /**
-     * When an object implementing interface {@code Runnable} is used
-     * to create a thread, starting the thread causes the object's
-     * {@code run} method to be called in that separately executing
-     * thread.
-     * <p>
-     * The general contract of the method {@code run} is that it may
-     * take any action whatsoever.
-     *
-     * @see Thread#run()
-     */
-
     private AudioFormat format;
     private SourceDataLine sourceDataLine;
     private DatagramSocket udpReceiver;
@@ -77,7 +68,7 @@ public class UdpReceiveThread implements Runnable {
             }
             byte[] data = datagramPacket.getData();
 
-            //从data中先读出realdata的长度，再读出realdata
+            //从data中先读出realdata的长度，再独户realdata
             ByteBuffer byteBuffer = ByteBuffer.wrap(data);
 
             //读出第一个int，分辨这是一个video数据包还是audio数据包。1代表video，2代表audio

@@ -1,9 +1,12 @@
 import Comman.ServerInfo;
 import Threads.TcpInputThread;
+import Threads.UdpReceiveThread;
+import Threads.UdpSendThread;
 import Utils.PortUtils;
 import Entity.*;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.Scanner;
@@ -22,6 +25,8 @@ public class Client {
 //    private static String communicationDesName;//联络对象Name
     public static LinkedList<User> friends;//friend list
     private static Scanner scanner = new Scanner(System.in);
+    private static Thread udpSendThread;
+    private static Thread udpReceiveThread;
 
     public static void main(String[] args) {
         clientPort = PortUtils.selectServerPort();
@@ -63,6 +68,7 @@ public class Client {
                         && tcpMessage.getFlag() == 2) {
                     LoginResult loginResult = (LoginResult) tcpMessage;
                     if (loginResult.isSuccess()) {//login succeeded
+                        ID=loginResult.getUserId();
                         friends = loginResult.getFriends();
                         System.out.println("您的好友：");
                         for (User f : friends) {
@@ -86,10 +92,10 @@ public class Client {
                 e.printStackTrace();
             }
         }
-        
-        //开启一个WaitSelectFriend线程，它在用户选择好友时，会不断扫描用户的输入
-        Thread waitSelectFriend=new Thread(new TcpInputThread(communicatingFriend,scanner,tcpIn,tcpOut,friends));
-        waitSelectFriend.start();
+
+        //开启一个tcpInputThread线程，它会不断扫描用户的输入
+        Thread tcpInputThread=new Thread(new TcpInputThread(communicatingFriend,scanner,tcpIn,tcpOut,friends));
+        tcpInputThread.start();
         
         Thread listenTcpMessage=new Thread(()->{
             while(true){
@@ -125,18 +131,34 @@ public class Client {
                             //设置联系对象的信息
                             for (User f:friends
                             ) {
-                                if(f.getUserId()==communicationStartNotify.getFriendId()) communicatingFriend.add(f);
+                                if(f.getUserId()==communicationStartNotify.getFriendId()) {
+                                    communicatingFriend.add(f);
+                                }
                             }
 
                             System.out.println("您的好友 "+communicatingFriend.get(0)+" 发起了联络~~");
                             System.out.println("----------------------与 "+communicatingFriend.get(0).getUserName()+" 的聊天室--------------------");
 
+                            //使得Server上的SingelTcpThread结束
+                            TextMessageFromClient textMessageFromClient=new TextMessageFromClient(communicatingFriend.get(0).getUserId(),"111");
+                            tcpOut.writeObject(textMessageFromClient);
+                            tcpOut.flush();
 
-                        } else if (tcpMessage.getFlag()==7) {
+
+                        } else if (tcpMessage.getFlag()==7) {//文字消息
                             //TextMessage
                             TextMessageFromServer textMessageFromServer=(TextMessageFromServer) tcpMessage;
                             System.out.println("##### "+communicatingFriend.get(0).getUserName()+":   "+textMessageFromServer.getMessage());
                             System.out.println();
+                        } else if (tcpMessage.getFlag()==9) {//通知开启video
+                            VideoStartNotify videoStartNotify=(VideoStartNotify) tcpMessage;
+                            udpReceiveThread=new Thread(new UdpReceiveThread(clientPort));
+                            udpSendThread=new Thread(new UdpSendThread(
+                                    (InetSocketAddress) tcpSocket.getRemoteSocketAddress(),
+                                    ID
+                            ));
+                            udpSendThread.start();
+                            udpReceiveThread.start();
                         }
                     }
                 } catch (IOException e) {

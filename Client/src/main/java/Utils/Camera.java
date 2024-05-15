@@ -1,4 +1,4 @@
-package Reference;
+package Utils;
 
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamPanel;

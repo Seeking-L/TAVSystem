@@ -1,4 +1,4 @@
-package Reference;
+package Threads;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
@@ -10,13 +10,15 @@ import java.nio.ByteBuffer;
 //refer to https://blog.csdn.net/weixin_42168430/article/details/109257345    ---LJQ
 public class AudioSendThread implements Runnable{
 
+    private int ID;
     private InetSocketAddress remoteReceiver;//对方的接收端口
     private DatagramSocket udpAudioSender;
     private DatagramPacket datagramPacket;
     private AudioFormat format;
     private TargetDataLine targetDataLine;
 
-    public AudioSendThread(InetSocketAddress remoteReceiver) {
+    public AudioSendThread(int ID,InetSocketAddress remoteReceiver) {
+        this.ID=ID;
         this.remoteReceiver = remoteReceiver;
         try {
             this.udpAudioSender = new DatagramSocket();
@@ -46,8 +48,9 @@ public class AudioSendThread implements Runnable{
                 if(len!=-1) {
                     //将data的长度（int）转换为一个byte数组，插到data的最前端
                     ByteBuffer byteBuffer = ByteBuffer.allocate(2*Integer.BYTES);
-                    byteBuffer.putInt(0,2);//数字2代表这是一个audio数据包
+                    byteBuffer.putInt(0,ID);//用户ID
                     byteBuffer.putInt(4,len);
+                    byteBuffer.putInt(8,2);//数字2代表这是一个audio数据包
                     byte[] info = byteBuffer.array();
                     byte[] newData = new byte[info.length + data.length];
                     System.arraycopy(info, 0, newData, 0, info.length);

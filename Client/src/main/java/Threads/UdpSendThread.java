@@ -1,7 +1,6 @@
 package Threads;
 
-import Reference.AudioSendThread;
-import Reference.Camera;
+import Utils.Camera;
 import com.github.sarxos.webcam.Webcam;
 
 import javax.imageio.ImageIO;
@@ -13,20 +12,21 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
 public class UdpSendThread implements Runnable {
-    private String friendIP;
-    private int friendPort;
+
+    private int ID;
     private InetSocketAddress remoteReceiver;//对方的接收端口
     private DatagramSocket udpVideoSender;
     private DatagramPacket datagramPacket;
 
-    public UdpSendThread(InetSocketAddress remoteReceiver) {
+    public UdpSendThread(InetSocketAddress remoteReceiver,int ID) {
         this.remoteReceiver = remoteReceiver;
+        this.ID=ID;
     }
 
     @Override
     public void run() {
 
-        Thread audioSendThread=new Thread(new AudioSendThread(remoteReceiver));
+        Thread audioSendThread=new Thread(new AudioSendThread(ID,remoteReceiver));
         audioSendThread.start();
 
         try {
@@ -84,8 +84,9 @@ public class UdpSendThread implements Runnable {
 
         //将data的长度（int）转换为一个byte数组，插到data的最前端
         ByteBuffer byteBuffer = ByteBuffer.allocate(2*Integer.BYTES);
-        byteBuffer.putInt(0,1);//数字1代表这是一个Video数据包
+        byteBuffer.putInt(0,ID);//此用户的ID
         byteBuffer.putInt(4,data.length);
+        byteBuffer.putInt(8,1);//数字1代表这是一个Video数据包
         byte[] info = byteBuffer.array();
         byte[] newData = new byte[info.length + data.length];
         System.arraycopy(info, 0, newData, 0, info.length);

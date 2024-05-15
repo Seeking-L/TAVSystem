@@ -76,6 +76,10 @@ public class SingelTcpThread implements Runnable{
             try {
                 TcpMessage tcpMessage = null;
                 if (((tcpMessage = (TcpMessage) tcpIn.readObject()) != null)) {
+                    if(!sockets.containsKey(user.getUserId())) {
+                        System.out.println("!!!!!!!!!!!!!!!!!!!!!结束");
+                        break;
+                    }
                     if (tcpMessage.getFlag() == 3) {//一个用户发起了连接请求
                         //communication request
                         CommunicationRequest communicationRequest = (CommunicationRequest) tcpMessage;
@@ -94,7 +98,8 @@ public class SingelTcpThread implements Runnable{
                                 Thread communicationThread = new Thread(//顺序不可以反，其中secondSocket是被联系者
                                         new CommunicationThread(sockets,
                                                 socket, tcpIn, tcpOut,user.getUserId(),
-                                                secondSocket,communicationRequest.getFriendId())
+                                                secondSocket.getSocket(),secondSocket.getTcpIn(),secondSocket.getTcpOut()
+                                                ,communicationRequest.getFriendId())
                                 );
                                 communicationThread.start();
 

@@ -3,6 +3,7 @@ package Threads;
 import Entity.CommunicationRequest;
 import Entity.TextMessageFromClient;
 import Entity.User;
+import Entity.VideoRequest;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -52,18 +53,28 @@ public class TcpInputThread implements Runnable{
                             System.out.println("若希望联系好友，请输入好友的ID~");
                         }
                     }else {//已联系上好友
-                        System.out.println();
+                        System.out.println(communicatingFriend.get(0));
                         String message=scanner.nextLine();
+
                         if(message.equals("/bye")){//结束程序
                             System.exit(0);
-                        }
-                        TextMessageFromClient textMessageFromClient=new TextMessageFromClient(communicatingFriend.get(0).getUserId(),message);
-                        try {
+                        } else if (message.equals("/video")) {//请求开启video
+                            VideoRequest videoRequest=new VideoRequest();
+                            tcpOut.writeObject(videoRequest);
+                            tcpOut.flush();
+                            TextMessageFromClient textMessageFromClient = new TextMessageFromClient(
+                                    communicatingFriend.get(0).getUserId(), "----对方要求开启video----");
                             tcpOut.writeObject(textMessageFromClient);
                             tcpOut.flush();
-                        }catch (IOException e){
-                            System.out.println("--------------------信息发送失败！--------------------");
-                            e.printStackTrace();
+                        }else {//文字消息
+                            TextMessageFromClient textMessageFromClient = new TextMessageFromClient(communicatingFriend.get(0).getUserId(), message);
+                            try {
+                                tcpOut.writeObject(textMessageFromClient);
+                                tcpOut.flush();
+                            } catch (IOException e) {
+                                System.out.println("--------------------信息发送失败！--------------------");
+                                e.printStackTrace();
+                            }
                         }
                     }
                 }
