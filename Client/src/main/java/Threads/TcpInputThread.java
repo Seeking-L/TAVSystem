@@ -43,7 +43,7 @@ public class TcpInputThread implements Runnable{
                                 if (f.getUserId() == friendId) {//尝试联络好友
                                     tcpOut.writeObject(new CommunicationRequest(friendId));
                                     tcpOut.flush();
-                                    System.out.println("正在等待服务器回信，请稍候~");
+//                                    System.out.println("正在等待服务器回信，请稍候~");
                                     break OUT1;
                                 }
                             }

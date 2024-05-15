@@ -114,7 +114,11 @@ public class Client {
                             }else {//好友 is available,准备开启联络
                                 if(isCommunicating) continue;//说明已经已经处在了通信状态
 
-                                System.out.println("联络可用，正在准备开启联络");
+                                String friendName=null;
+                                for(User f : friends){
+                                    if(f.getUserId()==communicationRequestReflect.getFriendId()) friendName=f.getUserName();
+                                }
+                                System.out.println("----------------------与 "+friendName +" 的聊天室--------------------");
                                 isCommunicating=true;
 
                                 //设置联系对象的信息
@@ -140,7 +144,7 @@ public class Client {
                                 }
                             }
 
-                            System.out.println("您的好友 "+communicatingFriend.get(0)+" 发起了联络~~");
+                            System.out.println("您的好友 "+communicatingFriend.get(0).getUserName()+" 发起了联络");
                             System.out.println("----------------------与 "+communicatingFriend.get(0).getUserName()+" 的聊天室--------------------");
 
                             //使得Server上的SingelTcpThread结束
