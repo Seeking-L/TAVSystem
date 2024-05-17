@@ -1,9 +1,13 @@
 ### 计网大作业：IP电话  ———— 带服务端版本
+
+### java socket 编程实现的IP电话：支持text、audio、video
+### 开发环境：win10+IDEA+jdk17.0.1 
+### exe文件运行所需环境：安装jdk，版本17以上
 <br>
 
 > 由于目前在将Server部署到云服务器时，仍会有udp无法传给client的bug，所以此项目目前只支持局域网下的Server。
 
-#### 原始版本见：
+#### 不带服务器版本见：
 > https://github.com/Seeking-L/TAVNode
 
 
@@ -20,3 +24,13 @@
   - 检查Server所在的IP。<br>
   - 修改Client中的ServerInfo类，修正Server的IP与port。<br>
    ![image](READMEImgs/3.png)
+
+
+
+### 关于打包成exe(Client)：
+#### 参考博客
+> https://blog.csdn.net/zmq836010/article/details/124257340
+#### exe4j配置文件(Client)(请检查文件路径): 
+> /exe4jconfig/Client.exe4j
+#### exe文件图标:
+> /exe4jconfig/OIP-C.jfif

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<exe4j version="9.0" transformSequenceNumber="3">
+  <directoryPresets config="E:/IDEA/my_JAVAfiles/TAVSystem/Client/out/artifacts/Client_jar" />
+  <application name="Client" distributionSourceDir="E:/E.Desktop" />
+  <executable name="Client" wrapperType="embed" iconSet="true" iconFile="E:/SeekingL/Download/oip-c.ico" executableDir="." redirectStderr="false" executableMode="console" />
+  <java mainClass="Client" minVersion="1.8.0" allowBetaVM="true">
+    <classPath>
+      <archive location="E:/IDEA/my_JAVAfiles/TAVSystem/Client/out/artifacts/Client_jar/Client.jar" failOnError="false" />
+    </classPath>
+  </java>
+</exe4j>
