@@ -16,7 +16,7 @@
     > 由于目前云端服务器尚有bug未修改完成,只能在局域网下本机运行服务器，Server的IP和port无法确定。故：Client在运行前，需要修改Client中保存的Server的IP及port。
     
     在运行Client前：<br>
-  1. 首先运行Server，检查Server的打印输出，确定Server是port号。(一般是8888)<br>
-  2. 检查Server所在的IP。<br>
-  3. 修改Client中的ServerInfo类，修正Server的IP与port。<br>
+  -  首先运行Server，检查Server的打印输出，确定Server是port号。(一般是8888)<br>
+  - 检查Server所在的IP。<br>
+  - 修改Client中的ServerInfo类，修正Server的IP与port。<br>
    ![image](READMEImgs/3.png)
