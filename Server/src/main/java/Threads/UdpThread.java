@@ -24,15 +24,13 @@ public class UdpThread implements Runnable {
     //send
     private InetSocketAddress remoteReceiver1;//user1的接收端口
     private InetSocketAddress remoteReceiver2;//user2的接收端口
-    private DatagramSocket udpVideoSender;
+    private DatagramSocket udpSender;
     private DatagramPacket sendDataPacket;
 
     //receive
     private DatagramSocket udpReceiver;
     private DatagramPacket receivedDatagramPacket;
     private int localReceiverPort;//local udp receiver's port
-    private InputStream inputStream;
-    private DataInputStream dataInputStream;
 
 
     public UdpThread(int Id1,int Id2,int localReceiverPort, InetSocketAddress remoteReceiver1
@@ -45,7 +43,7 @@ public class UdpThread implements Runnable {
         this.remoteReceiver2 = remoteReceiver2;
         this.localReceiverPort = localReceiverPort;
         this.udpReceiver = new DatagramSocket(localReceiverPort);
-        this.udpVideoSender=new DatagramSocket();
+        this.udpSender =new DatagramSocket();
     }
 
     @Override
@@ -85,14 +83,17 @@ public class UdpThread implements Runnable {
             }
         }
 
-        udpVideoSender.close();
+        udpReceiver.close();
+        udpSender.close();
         System.out.println("udp receiver 正在关闭");
     }
 
 
     public void transmit(InetSocketAddress remoteReceiver,byte[] data) throws IOException {
+        System.out.println("send-to: "+remoteReceiver);
         sendDataPacket = new DatagramPacket(data, 0, data.length, remoteReceiver);
-        udpVideoSender.send(sendDataPacket);
+        udpReceiver.send(sendDataPacket);
+//        udpSender.send(sendDataPacket);
     }
 
 }

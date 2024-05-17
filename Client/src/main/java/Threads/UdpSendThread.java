@@ -81,7 +81,6 @@ public class UdpSendThread implements Runnable {
         }
 
         byte[] data = byteArrayOutputStream.toByteArray();
-
         //将data的长度（int）转换为一个byte数组，插到data的最前端
         ByteBuffer byteBuffer = ByteBuffer.allocate(3*Integer.BYTES);
         byteBuffer.putInt(0,ID);//此用户的ID

@@ -55,9 +55,9 @@ public class CommunicationThread implements Runnable {
 
         udpThread=null;
         remoteReceiver1=new InetSocketAddress(socket1.getInetAddress().getHostAddress(),socket1.getPort());
-        System.out.println("1: "+remoteReceiver1);
+        System.out.println("udp-1: "+remoteReceiver1);
         remoteReceiver2=new InetSocketAddress(socket2.getInetAddress().getHostAddress(),socket2.getPort());
-        System.out.println("2: "+remoteReceiver2);
+        System.out.println("udp-2: "+remoteReceiver2);
     }
 
     @Override

@@ -80,7 +80,8 @@ public class SingelTcpThread implements Runnable{
                         System.out.println("!!!!!!!!!!!!!!!!!!!!!结束");
                         break;
                     }
-                    if (tcpMessage.getFlag() == 3) {//一个用户发起了连接请求
+                    if (tcpMessage.getFlag() == 3) {
+                        //一个用户发起了连接请求
                         //communication request
                         CommunicationRequest communicationRequest = (CommunicationRequest) tcpMessage;
                         System.out.println(communicationRequest);//TODO 调试用

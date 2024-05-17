@@ -63,6 +63,7 @@ public class UdpReceiveThread implements Runnable {
             datagramPacket = new DatagramPacket(bytes, 0, bytes.length);
             try {
                 udpReceiver.receive(datagramPacket);
+                System.out.println("11111111111111");
             } catch (IOException e) {
                 e.printStackTrace();
             }

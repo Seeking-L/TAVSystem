@@ -1,17 +1,22 @@
-### 计网大作业：IP电话  ———— 带服务器版本
+### 计网大作业：IP电话  ———— 带服务端版本
 <br>
+
+> 由于目前在将Server部署到云服务器时，仍会有udp无法传给client的bug，所以此项目目前只支持局域网下的Server。
 
 #### 原始版本见：
 > https://github.com/Seeking-L/TAVNode
 
-#### 关于Server与Server2的说明：
-> 本系统原始设想的支持text、video、audio通信，其中text通信由于一些技术问题一直卡住没有实现（主要是多线程和scanner阻塞问题，暂时没有解决）。所以决定为了先把作业交上，剔除text通信功能。Server2中除去了text功能，保留了video、audio通信。
->> Server2中，用户连接上好友后，双方直接开启音视频通信，关闭了用户的text输入。<br>
-（以后如果有时间）一定补上
 
 #### 运行前修改：
-Server中：由于private key的保密需要，未将Keys类上传。运行前需要添加Keys类，并填写数据库的用户名以及密码。 Keys类如下：
+- Server中：由于private key的保密需要，未将Keys类上传。运行前需要添加Keys类，并填写数据库的用户名以及密码。 Keys类如下：<br>
+- ![image](READMEImgs/1.png)<br><br>
+- ![image](READMEImgs/2.png)
 
-![image](READMEImgs/1.png)
-
-![image](READMEImgs/2.png)
+- Client中：<br>
+    > 由于目前云端服务器尚有bug未修改完成,只能在局域网下本机运行服务器，Server的IP和port无法确定。故：Client在运行前，需要修改Client中保存的Server的IP及port。
+    
+    在运行Client前：<br>
+  1. 首先运行Server，检查Server的打印输出，确定Server是port号。(一般是8888)<br>
+  2. 检查Server所在的IP。<br>
+  3. 修改Client中的ServerInfo类，修正Server的IP与port。
+   ![image](READMEImgs/3.png)
