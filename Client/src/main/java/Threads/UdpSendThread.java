@@ -21,6 +21,15 @@ public class UdpSendThread implements Runnable {
     public UdpSendThread(InetSocketAddress remoteReceiver,int ID) {
         this.remoteReceiver = remoteReceiver;
         this.ID=ID;
+        try {
+            udpVideoSender = new DatagramSocket();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public DatagramSocket getUdpVideoSender() {
+        return udpVideoSender;
     }
 
     @Override
@@ -28,12 +37,6 @@ public class UdpSendThread implements Runnable {
 
         Thread audioSendThread=new Thread(new AudioSendThread(ID,remoteReceiver));
         audioSendThread.start();
-
-        try {
-            udpVideoSender = new DatagramSocket();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         Camera camera=new Camera("我,发送给"+remoteReceiver);
         Webcam webcam = Webcam.getDefault();
@@ -81,7 +84,7 @@ public class UdpSendThread implements Runnable {
         }
 
         byte[] data = byteArrayOutputStream.toByteArray();
-        //将data的长度（int）转换为一个byte数组，插到data的最前端
+        //将头信息
         ByteBuffer byteBuffer = ByteBuffer.allocate(3*Integer.BYTES);
         byteBuffer.putInt(0,ID);//此用户的ID
         byteBuffer.putInt(4,data.length);

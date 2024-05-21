@@ -162,11 +162,12 @@ public class Client {
                         else if (tcpMessage.getFlag() == 9) {
                             //通知开启video
                             VideoStartNotify videoStartNotify = (VideoStartNotify) tcpMessage;
-                            udpReceiveThread = new Thread(new UdpReceiveThread(clientPort));
-                            udpSendThread = new Thread(new UdpSendThread(
-                                    new InetSocketAddress(ServerInfo.SERVERIP, videoStartNotify.getServerUdpPort()),
-                                    ID
-                            ));
+                            InetSocketAddress remoteReceiver=new InetSocketAddress(ServerInfo.SERVERIP, videoStartNotify.getServerUdpPort());
+                            udpReceiveThread = new Thread(new UdpReceiveThread(clientPort,ID,remoteReceiver));
+                            UdpSendThread sendThread=new UdpSendThread(remoteReceiver, ID);
+                            udpSendThread = new Thread(sendThread
+                            );
+//                            udpReceiveThread = new Thread(new UdpReceiveThread(sendThread.getUdpVideoSender()));
                             udpSendThread.start();
                             udpReceiveThread.start();
                         }

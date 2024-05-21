@@ -8,17 +8,17 @@ import javax.sound.sampled.SourceDataLine;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class UdpReceiveThread implements Runnable {
+    private int ID;
+    private InetSocketAddress remoteReceiver;
     private AudioFormat format;
     private SourceDataLine sourceDataLine;
     private DatagramSocket udpReceiver;
@@ -29,11 +29,16 @@ public class UdpReceiveThread implements Runnable {
     private JFrame window;
     private Graphics g;
 
-    public UdpReceiveThread(int localReceiverPort) throws SocketException {
+    public UdpReceiveThread(int localReceiverPort,int ID,InetSocketAddress remoteReceiver) throws IOException {
+        this.ID=ID;
+        this.remoteReceiver=remoteReceiver;
         this.format = new AudioFormat(22050, 16, 1, true, false);
         System.out.println("----receiving video:  " + localReceiverPort + "----");
-        this.localReceiverPort = localReceiverPort;
+//        this.localReceiverPort = localReceiverPort;
         this.udpReceiver = new DatagramSocket(localReceiverPort);
+        for(int i=0;i<30;i++){//给server发送30个包，告诉server客户端的udpreceiver端口号
+            tellNatPort();
+        }
         window = new JFrame();
     }
 
@@ -80,6 +85,7 @@ public class UdpReceiveThread implements Runnable {
             int VAFlag = byteBuffer.getInt();
 
             if (VAFlag == 1) {//Video数据包
+                System.out.println("a video data");
 //                System.out.println("receive: realDataLength: " + realDataLength);//TODO---调试用
                 try {
                     trans(Arrays.copyOfRange(data, 8, realDataLength + 8));
@@ -89,6 +95,7 @@ public class UdpReceiveThread implements Runnable {
                     e.printStackTrace();
                 }
             } else if (VAFlag == 2) {//Audio数据包
+                System.out.println("a audio data");
                 sourceDataLine.write(data, 8, realDataLength+8);//播放声音
             }
         }
@@ -107,4 +114,15 @@ public class UdpReceiveThread implements Runnable {
 //        System.out.println("data.length: " + data.length);//TODO----调试用
     }
 
+    private void tellNatPort() throws IOException {
+        //将头信息
+        ByteBuffer byteBuffer = ByteBuffer.allocate(2*Integer.BYTES);
+        byteBuffer.putInt(0,ID);//此用户的ID
+        byteBuffer.putInt(4,3);//代表这是一个告知port用的数据包
+        byte[] info = byteBuffer.array();
+        //TODO--调试用
+//        System.out.println("send:-----data.len: "+data.length+"-----len.len: "+info.length+"-----newData.len:"+newData.length);
+        datagramPacket = new DatagramPacket(info, 0, info.length, remoteReceiver);
+        udpReceiver.send(datagramPacket);
+    }
 }

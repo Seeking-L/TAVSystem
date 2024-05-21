@@ -53,6 +53,8 @@ public class UdpThread implements Runnable {
             receivedDatagramPacket = new DatagramPacket(bytes, 0, bytes.length);
             try {
                 udpReceiver.receive(receivedDatagramPacket);
+                System.out.println();
+                System.out.println("from:"+receivedDatagramPacket.getAddress()+":"+receivedDatagramPacket.getPort());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -66,18 +68,35 @@ public class UdpThread implements Runnable {
 
             if (Flag == Id1) {// 1->2 的数据包
                 int realDataLength = byteBuffer.getInt();
+                if(realDataLength==3) {
+                    int port1 = receivedDatagramPacket.getPort();
+                    remoteReceiver1 = new InetSocketAddress(remoteReceiver1.getHostName(), port1);
+                    System.out.println("1: " + remoteReceiver1);
+                    continue;
+                }
+//                int realDataLength = byteBuffer.getInt();
                 System.out.println("1->2: realDataLength: " + realDataLength);//TODO---调试用
                 try {
                     transmit(remoteReceiver2,Arrays.copyOfRange(data, 4, realDataLength + 12));
                 } catch (IOException e) {
                     e.printStackTrace();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             } else if (Flag == Id2) {// 2->1 数据包
                 int realDataLength = byteBuffer.getInt();
+                if(realDataLength==3) {
+                    int port2 = receivedDatagramPacket.getPort();
+                    remoteReceiver2 = new InetSocketAddress(remoteReceiver2.getHostName(), port2);
+                    System.out.println("2: " + remoteReceiver2);
+                    continue;
+                }
+
+//                int realDataLength = byteBuffer.getInt();
                 System.out.println("2->1: realDataLength: " + realDataLength);//TODO---调试用
                 try {
                     transmit(remoteReceiver1,Arrays.copyOfRange(data, 4, realDataLength + 12));
-                } catch (IOException e) {
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
@@ -89,10 +108,12 @@ public class UdpThread implements Runnable {
     }
 
 
-    public void transmit(InetSocketAddress remoteReceiver,byte[] data) throws IOException {
+    public void transmit(InetSocketAddress remoteReceiver,byte[] data) throws IOException, InterruptedException {
         System.out.println("send-to: "+remoteReceiver);
         sendDataPacket = new DatagramPacket(data, 0, data.length, remoteReceiver);
+//        System.out.println(sendDataPacket.getLength());
         udpReceiver.send(sendDataPacket);
+//        Thread.sleep(20);
 //        udpSender.send(sendDataPacket);
     }
 

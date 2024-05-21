@@ -124,12 +124,6 @@ public class CommunicationThread implements Runnable {
                             localUdpPort= PortUtils.selectServerPort();
                             Thread.sleep(1000);
 
-                            //告知两个用户即将开启UDP
-                            tcpOut1.writeObject(new VideoStartNotify(localUdpPort));
-                            tcpOut2.writeObject(new VideoStartNotify(localUdpPort));
-                            tcpOut1.flush();
-                            tcpOut2.flush();
-
                             udpThread=new Thread(new UdpThread(
                                     Id1,
                                     Id2,
@@ -138,6 +132,14 @@ public class CommunicationThread implements Runnable {
                                     remoteReceiver2
                             ));
                             udpThread.start();
+
+                            //告知两个用户即将开启UDP
+                            tcpOut1.writeObject(new VideoStartNotify(localUdpPort));
+                            tcpOut2.writeObject(new VideoStartNotify(localUdpPort));
+                            tcpOut1.flush();
+                            tcpOut2.flush();
+
+
                         }
                     }
                 }
