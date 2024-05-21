@@ -38,4 +38,4 @@
 > https://blog.csdn.net/zmq836010/article/details/124257340
 > https://cloud.tencent.com/developer/article/2248453
 #### exe4j配置文件(Client)(请检查文件路径)及文件图标: 
-> /exe4jconfig/Client.exe4j
+> /exe4jconfig/
